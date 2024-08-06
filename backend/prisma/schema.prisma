@@ -1,0 +1,105 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+
+// Enum for roles
+enum Role {
+  ADMIN
+  MEMBER
+}
+
+// Enum for task priority
+enum Priority {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  user_name    String
+  user_email   String   @unique
+  user_password String
+  createdAt    DateTime @default(now())
+
+  projects     ProjectMember[]
+  tasks        TaskMember[]
+}
+
+model Project {
+  id              Int             @id @default(autoincrement())
+  project_title   String
+  project_description String
+
+  members         ProjectMember[]
+  tasks           Task[]
+}
+
+model ProjectMember {
+  project_id Int
+  user_id    Int
+  role       Role
+
+  project Project @relation(fields: [project_id], references: [id])
+  user    User    @relation(fields: [user_id], references: [id])
+
+  @@id([project_id, user_id])
+}
+
+// Model for Phase
+model Phase {
+  id          Int     @id @default(autoincrement())
+  phase_title String  @unique
+
+  tasks       Task[]
+}
+
+model Task {
+  id              Int            @id @default(autoincrement())
+  task_title      String
+  task_description String
+  deadline_date   DateTime
+  priority        Priority
+  phase_id        Int
+  project_id      Int
+
+  phase           Phase          @relation(fields: [phase_id], references: [id])
+  project         Project        @relation(fields: [project_id], references: [id])
+  items           TaskItem[]
+  members         TaskMember[]
+}
+
+model TaskItem {
+  id          Int     @id @default(autoincrement())
+  task_id     Int
+  item_title  String
+  is_completed Boolean
+
+  task        Task    @relation(fields: [task_id], references: [id])
+
+  @@index([task_id])
+}
+
+model TaskMember {
+  task_id Int
+  user_id Int
+
+  task Task @relation(fields: [task_id], references: [id])
+  user User @relation(fields: [user_id], references: [id])
+
+  @@id([task_id, user_id])
+}
+
+
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
