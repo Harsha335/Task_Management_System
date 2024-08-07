@@ -1,0 +1,24 @@
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+  
+td, th {
+    border: 1px solid #ffffff;
+    text-align: left;
+    padding: 8px;
+}
+
+tr:nth-child(even) {
+    background-color: var(--color-primary-light);
+    color: whitesmoke;
+}
+tr:nth-child(odd) {
+    background-color: var(--color-secondary-light);
+}
+tr:nth-child(even):hover {
+    background-color: var(--color-primary);
+}
+tr:nth-child(odd):hover {
+    background-color: var(--color-secondary);
+}

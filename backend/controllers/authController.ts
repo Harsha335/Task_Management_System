@@ -8,11 +8,13 @@ const prisma = new PrismaClient();
 // Sign in a user
 export const signInUser = async (req: Request, res: Response) => {
   const { user_email, user_password } = req.body;
+  console.log(user_email, user_password)
   try {
     // Find the user by email
     const user = await prisma.user.findUnique({
       where: { user_email },
     });
+    console.log(user)
 
     if (!user) {
       return res.status(401).json({ error: 'Invalid credentials' });
@@ -30,6 +32,7 @@ export const signInUser = async (req: Request, res: Response) => {
 
     res.status(200).json({ token });
   } catch (error) {
+    console.log(error)
     res.status(500).json({ error: 'Error signing in' });
   }
 };
@@ -39,7 +42,7 @@ export const signInUser = async (req: Request, res: Response) => {
 export const signUpUser = async (req: Request, res: Response) => {
   try {
     const { user_name, user_email, user_password } = req.body;
-
+    console.log(user_name, user_email, user_password)
     // Hash the password
     const hashedPassword = await bcrypt.hash(user_password, 10);
 
@@ -53,6 +56,7 @@ export const signUpUser = async (req: Request, res: Response) => {
 
     res.status(201).json(newUser);
   } catch (error) {
+    console.log("Error at signUp: ", error)
     res.status(500).json({ error: 'Error creating user' });
   }
 };

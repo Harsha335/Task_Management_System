@@ -2,13 +2,13 @@ import React from "react";
 import { useTable, useSortBy, usePagination } from "react-table";
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
-import './ReactTable.css'
+import './index.css'
 
 const generateSortingIndicator = (column) => {
   return column.isSorted ? (column.isSortedDesc ? <ArrowDropDownIcon/> : <ArrowDropUpIcon/>) : "";
 };
 
-export const ReactTable = ({ columns, data, defaultPageSize = 10}) => {
+const ReactTable = ({ columns, data, defaultPageSize = 10}) => {
   const { getTableProps, getTableBodyProps, headerGroups, page, prepareRow,
     canPreviousPage,
     canNextPage,
@@ -19,6 +19,9 @@ export const ReactTable = ({ columns, data, defaultPageSize = 10}) => {
     state: { pageIndex }
    } =
     useTable({ columns, data, initialState: {pageSize: defaultPageSize}, }, useSortBy, usePagination);
+    const handleOnProjectClick = (id) => {
+      window.location.href = `/project/${id}`;
+    }
 
   return (
     <div className="w-full">
@@ -39,7 +42,7 @@ export const ReactTable = ({ columns, data, defaultPageSize = 10}) => {
           {page.map((row, i) => {
             prepareRow(row);
             return (
-              <tr {...row.getRowProps()} className="cursor-pointer">
+              <tr {...row.getRowProps()} className="cursor-pointer" onClick={() => handleOnProjectClick(row.original.id)}>
                 {row.cells.map((cell) => {
                   return <td {...cell.getCellProps()}> {cell.render("Cell")}</td>;
                 })}
@@ -59,3 +62,5 @@ export const ReactTable = ({ columns, data, defaultPageSize = 10}) => {
     </div>
   );
 };
+
+export default ReactTable;

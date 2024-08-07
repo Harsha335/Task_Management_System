@@ -152,3 +152,43 @@ export const declineInvitation = (req: Request, res: Response) => {
     // Implement logic if needed
     res.status(200).json({ message: 'You have declined the invitation.' });
 };
+
+export const getProjectsByUserId = async (req: CustomRequest, res: Response) => {
+    try{
+        const user_id : number = req.user ? req.user.id : 0;
+        // const projectIds = await prisma.projectMember.findMany({
+        //     where: {
+        //         user_id
+        //     },
+        //     select: {
+        //         project_id: true
+        //     }
+        // }); 
+        const projectDetails = await prisma.project.findMany({
+            where: {
+                members: {
+                  some: {   // Ensure at least one related ProjectMember matches the condition
+                    user_id
+                  }
+                }
+              },
+            include: {
+              members: {    // ProjectMembers
+                include: {
+                  user: {
+                    select: {
+                      user_name: true,
+                      user_email: true
+                    }
+                  }
+                }
+              },
+            }
+          });          
+        console.log(projectDetails);
+        res.status(200).json({projectDetails});
+    }catch(err){
+        console.log("Error at getProjectsByUserId : ", err);
+        res.status(500).json({ error: 'Cannot get project of user' });
+    }
+}
