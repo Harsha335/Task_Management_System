@@ -78,7 +78,7 @@ const SignupForm : React.FC = () => {
         <div className='p-7 flex flex-col gap-10'>
             <span className='font-semibold text-2xl'>The secret of getting ahead is getting started.</span> 
             <div>
-                {error && <span className='text-red-500'>{error}</span>}
+                {error && <span className='text-error-light'>{error}</span>}
                 <form className="flex flex-col justify-between gap-12">
                     <div className="flex flex-col gap-4">
                         <div className="flex flex-col gap-2">
@@ -98,7 +98,7 @@ const SignupForm : React.FC = () => {
                             <input type="password" placeholder="Enter user Password Again" id="userConfirmPassword" className="p-1 border-2 border-zinc-300" required value={userForm.userConfirmPassword} onChange={(e) => handleInputOnChange(e)}/>
                         </div>
                     </div>
-                    <input type='submit' className="bg-[#3572EF] rounded-sm text-white p-1 cursor-pointer"  value='Sign Up' onClick={(e) => handleSubmit(e)}/>
+                    <input type='submit' className="bg-primary-light rounded-md text-white p-1 cursor-pointer"  value='Sign Up' onClick={(e) => handleSubmit(e)}/>
                 </form>
             </div>
         </div>

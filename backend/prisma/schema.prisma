@@ -33,6 +33,9 @@ model Project {
   id              Int             @id @default(autoincrement())
   project_title   String
   project_description String
+  is_completed          Boolean         @default(false)
+  project_deadline_date DateTime?
+  project_completed_date DateTime?
 
   members         ProjectMember[]
   tasks           Task[]
@@ -61,7 +64,8 @@ model Task {
   id              Int            @id @default(autoincrement())
   task_title      String
   task_description String
-  deadline_date   DateTime
+  task_deadline_date DateTime
+  task_completed_date DateTime
   priority        Priority
   phase_id        Int
   project_id      Int

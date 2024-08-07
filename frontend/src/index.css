@@ -4,7 +4,7 @@
 
 :root {
     --color-primary-light: #1E90FF;
-    --color-primary: #007BFF;
+    --color-primary: #006bdd;
 
     --color-secondary-light: #F0F0F0;
     --color-secondary: #D3D3D3;
@@ -13,6 +13,7 @@
     --color-accent-light: #2C3E50;
     --color-accent: #34495E;
 
+    /* For notifications */
     --color-success-light: #28A745;
     --color-success: #2ECC71;
 

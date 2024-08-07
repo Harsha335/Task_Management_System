@@ -23,6 +23,6 @@ export const verifyUser = (req: CustomRequest, res: Response, next: NextFunction
     next(); // Proceed to the next middleware or route handler
   } catch (error) {
     console.log(error);
-    return res.status(403).json({ error: 'Invalid or expired token' });
+    return res.status(401).json({ error: 'Invalid or expired token' });
   }
 };
