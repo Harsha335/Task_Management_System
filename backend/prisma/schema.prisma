@@ -65,7 +65,7 @@ model Task {
   task_title      String
   task_description String
   task_deadline_date DateTime
-  task_completed_date DateTime
+  task_completed_date DateTime @updatedAt // This will automatically update whenever the record is updated
   priority        Priority
   phase_id        Int
   project_id      Int

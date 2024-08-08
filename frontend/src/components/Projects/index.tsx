@@ -25,7 +25,7 @@ const Projects = () => {
           accessor: "members",
           Cell: ({ value } : {value: any})  => (
             <div className='flex pl-3'>
-              <UserAvathar users={value.map((member: any) => ({'name': member.user.user_name, 'email':member.user.user_email}))}/>
+              <UserAvathar maxUsersCount={5} users={value.map((member: any) => ({'name': member.user.user_name, 'email':member.user.user_email}))}/>
             </div>
           )
         },

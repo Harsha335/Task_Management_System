@@ -34,14 +34,14 @@ type avatharPropsType = {
     name: string;
     email: string;
 }
-export default function UserAvathar({users} : {users:avatharPropsType[]}) {
+export default function UserAvathar({users, maxUsersCount} : {users:avatharPropsType[], maxUsersCount: number}) {
   return (
-    <AvatarGroup max={4}>
+    <AvatarGroup max={maxUsersCount}>
         {
             users.map((user, index) => (
                 <div className='group relative'>
                     <Avatar {...stringAvatar(user.name.toUpperCase())} key={index} />
-                    <span className='group-hover:flex flex-col p-2 hidden absolute bottom-10 right-0 bg-white rounded-lg border-2 border-black'>
+                    <span className='group-hover:flex flex-col p-2 hidden absolute top-11 right-0 text-black z-10 bg-white rounded-lg border-2 border-black'>
                         <span className='flex flex-row items-center gap-1'>
                             <span><Avatar {...stringAvatar(user.name.toUpperCase())} key={index} /> </span>
                             <span>{user.name}</span>

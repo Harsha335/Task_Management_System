@@ -40,7 +40,7 @@ const CreateTaskPopup : React.FC<PropsType> = ({projectId, phaseId, handleCreate
         handleClose();
     }
     return (
-        <div className='bg-slate-200 bg-transparent absolute top-0 left-0 w-full h-full flex items-center justify-center '>
+        <div className='bg-[rgba(0,0,0,0.7)] absolute top-0 left-0 w-full h-full flex items-center justify-center '>
             <div className='w-96 bg-white p-5 rounded-lg relative'>
                 <button className='rounded-full absolute top-3 right-3' onClick={() => handleClose()}><ClearIcon/></button>
                 <form className="flex flex-col justify-between gap-12">

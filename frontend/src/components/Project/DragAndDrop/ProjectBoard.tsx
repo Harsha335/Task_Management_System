@@ -2,6 +2,7 @@
 import { DragDropContext, DropResult } from "react-beautiful-dnd";
 import ItemsColumn from "./ItemsColumn";
 import StrictModeDroppable from "./Dragable";
+import axiosTokenInstance from "../../../api_calls/api_token_instance";
 
 // interface ITodoItem {
 //   id: number;
@@ -117,6 +118,9 @@ const ProjectBoard  = ({allPhaseTask, setAllPhaseTask, projectId} : {allPhaseTas
     if (!result.destination) {
       return;
     }
+    // console.log("source: ",source)
+    // console.log("destination: ",destination)
+    console.log("result: ",result)
 
     const sourceSectionId = source.droppableId;
     const destSectionId = destination?.droppableId;
@@ -127,24 +131,24 @@ const ProjectBoard  = ({allPhaseTask, setAllPhaseTask, projectId} : {allPhaseTas
 
     // REORDER: if source and destination droppable ids are same
     if (sourceSectionId === destSectionId) {
-      const column = allPhaseTask.filter(phaseTask => phaseTask.id.toString() === sourceSectionId)[0];
+      // console.log("Same DND Column ");
+      const column = allPhaseTask[parseInt(sourceSectionId, 10)];
+      // console.log("column: ", column)
       const reorderedItems = reorder(
         column.tasks,
         source.index,
         destination.index
       );
 
-      setAllPhaseTask(allPhaseTask => ({
-        ...allPhaseTask,
-        [destSectionId]: {
-          ...column,
-          tasks: reorderedItems,
-        },
-      }));
+      setAllPhaseTask(allPhaseTask => {
+        const tempAllPhaseTask = [...allPhaseTask];
+        tempAllPhaseTask[parseInt(sourceSectionId, 10)] = {...tempAllPhaseTask[parseInt(sourceSectionId, 10)],tasks: reorderedItems};
+        return tempAllPhaseTask;
+      });
     }
     else{
-      const sourceColumn = allPhaseTask.filter(phaseTask => phaseTask.id.toString() === sourceSectionId)[0];
-      const desColumn = allPhaseTask.filter(phaseTask => phaseTask.id.toString() === destSectionId)[0];
+      const sourceColumn = allPhaseTask[parseInt(sourceSectionId, 10)];
+      const desColumn = allPhaseTask[parseInt(destSectionId, 10)];
 
       const taskToDrop = sourceColumn.tasks.find(
         (task) => task.id.toString() == result.draggableId
@@ -158,17 +162,20 @@ const ProjectBoard  = ({allPhaseTask, setAllPhaseTask, projectId} : {allPhaseTas
         sourceColumnItems.splice(result.source.index, 1);
         destColumnItems.splice(result.destination.index, 0, taskToDrop);
 
-        setAllPhaseTask({
-          ...allPhaseTask,
-          [sourceSectionId]: {
-            ...sourceColumn,
-            tasks: sourceColumnItems,
-          },
-          [destSectionId]: {
-            ...desColumn,
-            tasks: destColumnItems,
-          },
+        setAllPhaseTask(allPhaseTask => {
+          const tempAllPhaseTask = [...allPhaseTask];
+          tempAllPhaseTask[parseInt(sourceSectionId, 10)] = {...tempAllPhaseTask[parseInt(sourceSectionId, 10)],tasks: sourceColumnItems};
+          tempAllPhaseTask[parseInt(destSectionId, 10)] = {...tempAllPhaseTask[parseInt(destSectionId, 10)],tasks: destColumnItems};
+          return tempAllPhaseTask;
         });
+
+        const swapTasks = async () => {
+          await axiosTokenInstance.post('/api/project/swap/task', {
+            task_id : parseInt(result.draggableId, 10),
+            phase_id: parseInt(destSectionId, 10)+1 // take real phase_id
+          })
+        }
+        swapTasks();
       }
     }
   };
@@ -177,8 +184,8 @@ const ProjectBoard  = ({allPhaseTask, setAllPhaseTask, projectId} : {allPhaseTas
     <div className="w-full h-full">
       <div className="flex flex-row gap-3 w-full p-4">
         <DragDropContext onDragEnd={onDragEnd}>
-          {allPhaseTask.map((phase) => (
-            <StrictModeDroppable droppableId={phase.id.toString()} key={phase.id}>
+          {allPhaseTask && allPhaseTask.map((phase, index) => (
+            <StrictModeDroppable droppableId={index.toString()} key={index}>
               {(provided) => (
                 <div className="flex-1" {...provided.droppableProps} ref={provided.innerRef}>
                   <ItemsColumn

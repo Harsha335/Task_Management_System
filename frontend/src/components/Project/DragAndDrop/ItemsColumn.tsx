@@ -61,21 +61,21 @@ const ItemsColumn = ({ columnTitle, tasks, projectId, phaseId }: tasksColumnProp
     <div
       className="min-h-48 scrollbar-thin scrollbar-thumb-blue-700 
     scrollbar-track-blue-300 overflow-y-auto
-      p-4 rounded-md border border-black flex flex-col justify-between"
+      p-4 rounded-md border-2 border-slate-300 shadow-inner bg-slate-100 flex flex-col justify-between"
     >
-      {/* Phase(column) title */}
       <div>
         <p className="inline-block py-1 px-2 text-lg font-semibold ">
           {columnTitle}
         </p>
         <div className=" pt-4 flex flex-col gap-y-3">
-          {tasks &&
+          {tasks && tasks.length > 0 &&
             tasks.map((task, index) => (
               <Card
                 key={task.id}
                 draggableId={task.id.toString()}
                 index={index}
                 task={task}
+                id={task.id}
                 projectId={projectId}
                 phaseId={phaseId}
               />

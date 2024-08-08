@@ -1,4 +1,3 @@
-import { FormatSizeOutlined } from "@mui/icons-material";
 import { toZonedTime, format as formatZoned } from 'date-fns-tz';
 import { Draggable } from "react-beautiful-dnd";
 import TimerIcon from '@mui/icons-material/Timer';
@@ -47,6 +46,7 @@ enum Priority {
 };
 
 interface CardProps {
+  id: number;
   task: Task;
   draggableId: string;
   index: number;
@@ -71,6 +71,7 @@ const Card = ({ task, draggableId, index, projectId, phaseId }: CardProps) => {
     setOpenPopup(isOpen => !isOpen);
   }
   return (
+    <>
     <Draggable draggableId={draggableId} index={index}>
       {(provided, snapshot) => (
         <div
@@ -79,21 +80,24 @@ const Card = ({ task, draggableId, index, projectId, phaseId }: CardProps) => {
           {...provided.dragHandleProps}
           className={`${
             snapshot.isDragging ? "bg-gray-100" : "bg-white"
-          } px-2 py-4 font-medium w-full h-24 shadow-md shadow-blue-300 rounded-md flex flex-col gap-2`}
+          } px-2 py-4 font-medium w-full min-h-24 shadow-md shadow-slate-300 rounded-md flex flex-col gap-2`}
           onClick={() => handleTaskPopup()}
         >
           <div className="flex flex-row justify-between">
             <span>{task.task_title}</span>
-            <span className={`px-2 py-1 ${taskPriorityColors[task.priority]}  text-sm rounded-lg`}>{task.priority}</span>
+            <span >
+              <span className={`px-2 py-1 ${taskPriorityColors[task.priority]} text-sm rounded-md`}>{task.priority}</span>
+            </span>
           </div>
           <div className="flex flex-row justify-between">
             <span className="border-2 p-1 bg-slate-300"><TimerIcon/> {timeConverter(task.task_deadline_date)}</span>
             {/* <span className={`px-2 py-1 ${taskPriorityColors[task.priority]}  text-sm rounded-lg`}>{task.members.}</span> */}
           </div>
-          {openPopup && <TaskPopup projectId={projectId} phaseId={phaseId} handleTaskPopup={handleTaskPopup} task={task}/>}
         </div>
       )}
     </Draggable>
+    {openPopup && <TaskPopup projectId={projectId} phaseId={phaseId} handleTaskPopup={handleTaskPopup} task={task}/>}
+    </>
   );
 };
 

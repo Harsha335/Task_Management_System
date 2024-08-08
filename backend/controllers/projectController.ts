@@ -324,3 +324,118 @@ export const createTask = async ( req: CustomProjectRequest, res: Response) => {
         res.status(500).json({error: "Error in creating a task "});
     }
 }
+
+interface CustomTaskRequest extends Request {
+  user?: JwtPayload;
+  query : any;
+}
+
+export const joinTask = async (req : CustomTaskRequest, res: Response) => {
+  try{
+    console.log("Joining task...")
+    const user_id = req.user?.id ? req.user.id : 0;
+    const {taskId} = req.query;
+    // Check if the task member already exists
+    const existingTaskMember = await prisma.taskMember.findFirst({
+      where: {
+        user_id: user_id,
+        task_id: parseInt(taskId as string, 10),
+      },
+    });
+
+    if (existingTaskMember) {
+      // If the task member already exists, do nothing and send a message
+      console.log("User is already a member of this task.");
+      return res.status(409).json({ error: "User is already a member of this task." });
+    }
+    
+    const newTaskMember = await prisma.taskMember.create({
+      data: {
+        user_id,
+        task_id: parseInt(taskId, 10)
+      }
+    });
+    console.log("Joined task.")
+    const user = await prisma.user.findFirst({
+      where:{
+        id: user_id
+      }
+    })
+    res.status(201).json({user});
+  }catch(err){
+    console.log("Error in Join task : ", err);
+    res.status(500).json({error: "Error in joining a task "});
+  }
+}
+
+export const updateTask = async (req: CustomProjectRequest, res: Response) => {
+  try{
+    type TaskItem = {
+      id?: number;
+      task_id?: number;
+      item_title?: string;
+      is_completed?: boolean;
+    };
+    const {priority,task_deadline_date} = req.body;
+    const items: TaskItem[] = req.body.items;
+    const {taskId} = req.query;
+    await prisma.task.update({
+      where:{
+        id: parseInt(taskId, 10)
+      },
+      data:{
+        priority,
+        task_deadline_date
+      }
+    });
+    if(items){
+      // for update items
+      const operations = items.map((item: TaskItem) => {
+        if (item.id) {
+          // If id is present, update the existing item
+          return prisma.taskItem.update({
+            where: { id: item.id },
+            data: {
+              item_title: item.item_title,
+              is_completed: item.is_completed,
+            },
+          });
+        } else {
+          // If no id, create a new item
+          return prisma.taskItem.create({
+            data: {
+              task_id: item.task_id || 0,
+              item_title: item.item_title || "",
+              is_completed: item.is_completed || false,
+            },
+          });
+        }
+      });
+      await Promise.all(operations);
+    }
+    res.status(200).json({message: "Task updated successfully"});
+  }catch(err){
+    console.log("Error at updateTask: ", err);
+    res.status(500).json({error: "Error in updating a task"});
+  }
+}
+
+export const swapTask = async (req: Request, res: Response) => {
+  try{
+    const {task_id, phase_id} = req.body;
+    
+    const resp = await prisma.task.update({
+      where:{
+        id: task_id
+      },
+      data: {
+        phase_id
+      }
+    });
+    console.log(resp);
+    res.status(200).json({message: "Updated task phase successfully"});
+  }catch(err){
+    console.log("Error at swapTask: ", err);
+    res.status(500).json({error: "Error in swaping a task b/n phases"});
+  }
+}

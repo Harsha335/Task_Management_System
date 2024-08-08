@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import ClearIcon from '@mui/icons-material/Clear';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import DescriptionIcon from '@mui/icons-material/Description';
@@ -15,7 +15,7 @@ type User = {
   };
   
    type TaskItem = {
-    id: number;
+    id?: number;
     task_id: number;
     item_title: string;
     is_completed: boolean;
@@ -56,38 +56,11 @@ type PropsType = {
 }
 const TaskPopup : React.FC<PropsType> = ({projectId, phaseId, handleTaskPopup, task}) => {
 
-    // Enum for task priority
-    enum Priority {
-        HIGH,
-        MEDIUM,
-        LOW
-    }
-    type TaskItem = {
-        id?: number;
-        task_id?: number;
-        item_title: string;
-        is_completed: boolean;
-    };
-    type taskDataType = {
-        task_title: string;
-        task_description: string;
-        task_members: string[];
-        priority: Priority;
-        task_deadline_date: Date;
-        task_items: TaskItem[]
-    }
-    const [taskData, setTaskData] = useState<taskDataType>(
-        {
-            task_title: '',
-            task_description: '',
-            task_members: ['assadiharsha@gmail.com', 'harsha@gmail.com'],
-            priority: 2,
-            task_deadline_date: new Date(),
-            task_items: []
-        }
+    const [taskData, setTaskData] = useState<Task>(
+        task
     );
     
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLSelectElement>) => {
         e.preventDefault();
         const title: string = e.target.name;
         const value : string = e.target.value;
@@ -96,25 +69,32 @@ const TaskPopup : React.FC<PropsType> = ({projectId, phaseId, handleTaskPopup, t
     const [taskItem, setTaskItem] = useState<string>('');
     const handleTaskItemAdd = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         e.preventDefault();  
-        if(taskItem.trim().length !== 0 ) {
+        if(taskItem.trim().length !== 0) {
             setTaskData((prevData) => ({
                 ...prevData,
-                task_items: [...(prevData?.task_items || []), {item_title: taskItem, is_completed: false}]
+                items: [...prevData.items, {task_id: task.id, item_title: taskItem, is_completed: false}]
             }));
+            // console.log({item_title: taskItem, is_completed: false})
+            // console.log(taskData)
             setTaskItem('');
         }
     }
-    const handleJoinTask = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    const handleJoinTask = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         e.preventDefault();
-        // add userEmail to task
-        // TODO: send join to this task to backend
+        try{
+            const res = await axiosTokenInstance.post(`/api/project/join/task?taskId=${task.id}`);
+            const user = res.data.user;
+            setTaskData(prevData => ({...prevData, members: [...prevData.members, {task_id: task.id, user_id: user.id, user}]}))
+        }catch(err){
+            console.log("Error at handleJoinTask: ",err);
+        }
     }
     const setTaskItemCompleted = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
-        const isCompleted = e.target.checked; // Get the new checked value
+        const isCompleted = e.target.checked;
         setTaskData(prevData => {
-            const updatedItems = [...prevData.task_items];
+            const updatedItems = [...prevData.items];
             updatedItems[index] = { ...updatedItems[index], is_completed: isCompleted };
-            return { ...prevData, task_items: updatedItems };
+            return { ...prevData, items: updatedItems };
         });
     };
 
@@ -125,58 +105,66 @@ const TaskPopup : React.FC<PropsType> = ({projectId, phaseId, handleTaskPopup, t
     const handleSubmit = async (e: React.MouseEvent<HTMLInputElement, MouseEvent>) => {
         e.preventDefault();
         try{
-            // await axiosTokenInstance.post('/api/project/task/create', projectData);
+            await axiosTokenInstance.post(`/api/project/update/task?taskId=${task.id}`, {priority: taskData.priority,task_deadline_date: taskData.task_deadline_date, items: taskData.items});
         }catch(err){
             console.log("Error at handle create new task : ",err);
         }
         handleClose();
     }
     return (
-        <div className='bg-slate-200 bg-transparent absolute top-0 left-0 w-full h-full flex items-center justify-center '>
-            <div className='w-96 bg-white p-5 rounded-lg relative'>
+        <div className='bg-[rgba(0,0,0,0.7)] absolute top-0 left-0 w-full h-full flex items-center justify-center '>
+            <div className='min-w-96 bg-white p-5 rounded-lg relative'>
                 <button className='rounded-full absolute top-3 right-3' onClick={() => handleClose()}><ClearIcon/></button>
                 <form className="flex flex-col justify-between gap-12">
                     <div className="flex flex-col gap-4">
                         <div className="flex flex-col gap-2">
-                            <input type="text" placeholder="Enter Task title" name="task_title" className="p-1 border-2 border-zinc-300 w-[90%]" required value={taskData.task_title} onChange={(e) => handleInputChange(e)}/>
+                            {/* <input type="text" placeholder="Enter Task title" name="task_title" className="p-1 border-2 border-zinc-300 w-[90%]" required value={taskData.task_title} onChange={(e) => handleInputChange(e)}/> */}
+                            <span className='text-xl font-bold'>{taskData.task_title}</span>
                         </div>
                         <div className="flex flex-col gap-2">
-                            <label htmlFor="task_description" className="font-medium"><DescriptionIcon/> Description</label>
-                            <input type="text" placeholder="Enter project description" name='task_description' id="task_description" className="p-1 border-2 border-zinc-300" required value={taskData.task_description} onChange={(e) => handleInputChange(e)}/>
+                            <label htmlFor="task_description" className="text-lg font-medium flex items-center gap-2"><DescriptionIcon/> Description</label>
+                            {/* <input type="text" placeholder="Enter project description" name='task_description' id="task_description" className="p-1 border-2 border-zinc-300" required value={taskData.task_description} onChange={(e) => handleInputChange(e)}/> */}
+                            <span className='px-2 py-1'>{taskData.task_description}</span>
                         </div>
                         <div className="flex flex-col gap-2">
                             <div className='flex flex-row justify-between'>
-                                <label htmlFor="task_members" className="font-medium">Members</label>
+                                <label htmlFor="task_members" className="text-lg font-medium">Members</label>
                                 <button className='px-2 py-1 bg-primary text-white w-auto rounded-lg' onClick={(e) => handleJoinTask(e)}>JOIN</button>
                             </div>
                             <ul id="task_members" className='flex flex-col'>
                                 {
-                                    taskData.task_members?.map((member: string) => (
-                                        <li className='pl-2'><ArrowRightIcon/> {member}</li>
+                                    taskData.members.map((member: TaskMember) => (
+                                        <li className='pl-2'><ArrowRightIcon/> {member.user.user_name}</li>
                                     ))
                                 }
                             </ul>
                         </div>
                         <div className='flex flex-row gap-3'>
                                 <div className=" flex-1 flex flex-col gap-2">
-                                    <label htmlFor="priority" className="font-medium">Priority</label>
-                                    <select name="priority" id="priority" className='cursor-pointer p-1 border-2 border-zinc-300'>
+                                    <label htmlFor="priority" className="text-lg font-medium">Priority</label>
+                                    <select defaultValue={taskData.priority} name="priority" id="priority" onChange={(e) => handleInputChange(e)} className='cursor-pointer p-1 border-2 border-zinc-300'>
                                         <option value='HIGH'>High</option>
                                         <option value='MEDIUM'>Medium</option>
-                                        <option value='LOW' selected>Low</option>
+                                        <option value='LOW'>Low</option>
                                     </select>
                                 </div>
                                 <div className="flex-1 flex flex-col gap-2">
-                                    <label htmlFor="task_deadline_date" className="font-medium">Task Deadline</label>
-                                    <DatePicker className="p-1 border-2 border-zinc-300" selected={taskData.task_deadline_date} onChange={(date ) => date && setTaskData(taskData => ({...taskData, task_deadline_date: date}))} />
+                                    <label htmlFor="task_deadline_date" className="text-lg font-medium">Task Deadline</label>
+                                    <DatePicker className="p-1 border-2 border-zinc-300" selected={taskData.task_deadline_date} onChange={(date) => date && setTaskData(taskData => ({...taskData, task_deadline_date: date}))} />
                                     {/* <input type="text" placeholder="Enter project description" id="task_deadline_date" className="p-1 border-2 border-zinc-300" required value={projectData?.task_description} onChange={(e) => handleInputChange(e)}/> */}
                                 </div>
                         </div>
                         <div className="flex flex-col gap-2">
-                            <label htmlFor="task_items" className="font-medium"><TaskAltIcon/> Checklist</label>
+                            <label htmlFor="task_items" className="text-lg font-medium flex gap-2 items-center"><TaskAltIcon/> Checklist</label>
                             <ul id="task_items" className='flex flex-col'>
+                                {/* <progress className='w-full text-primary-light' value={taskData.items.reduce((sum, item) => sum + (item.is_completed ? 1 : 0), 0)/taskData.items.length} max="1"></progress> */}
+                                {taskData.items.length > 0 && 
+                                    <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                                    <div className={`bg-blue-600 h-2.5 rounded-full`} style={{width: `${((taskData.items.reduce((sum, item) => sum + (item.is_completed ? 1 : 0), 0)/taskData.items.length)*100)}%`}}></div>
+                                    </div>
+                                }
                                 {
-                                    taskData.task_items?.map((item: TaskItem, index: number) => (
+                                    taskData.items.map((item: TaskItem, index: number) => (
                                         <div key={index} className='flex flex-row gap-2'>
                                             <input type='checkbox' id={index.toString()} checked={item.is_completed} onChange={(e) => setTaskItemCompleted(e, index)} />
                                             <label htmlFor={index.toString()} className={`${item.is_completed ? 'line-through' : ''}`}> {item.item_title} </label>
@@ -192,7 +180,7 @@ const TaskPopup : React.FC<PropsType> = ({projectId, phaseId, handleTaskPopup, t
                             </div>
                         </div>
                     </div>
-                    <input type='submit' className="bg-primary-light rounded-md text-white p-1 cursor-pointer"  value='Create Task' onClick={(e) => handleSubmit(e)}/>
+                    <input type='submit' className="bg-primary-light rounded-md text-white p-1 cursor-pointer"  value='Update Task' onClick={(e) => handleSubmit(e)}/>
                 </form>
             </div>
         </div>
