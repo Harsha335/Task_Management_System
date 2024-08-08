@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Request, response, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 const nodemailer = require('nodemailer');
 import bcrypt from 'bcrypt';
@@ -190,5 +190,137 @@ export const getProjectsByUserId = async (req: CustomRequest, res: Response) => 
     }catch(err){
         console.log("Error at getProjectsByUserId : ", err);
         res.status(500).json({ error: 'Cannot get project of user' });
+    }
+}
+
+interface CustomProjectRequest extends Request {
+    query : any;
+}
+
+export const getProjectMembers = async (req: CustomProjectRequest, res: Response) => {
+    try {
+        const projectId = req.query.projectId;
+        // Ensure projectId is provided and is valid number
+        if (!projectId || isNaN(Number(projectId))) {
+            return res.status(400).json({ error: 'Invalid projectId ' });
+        }
+      const projectWithMembers = await prisma.project.findUnique({
+        where: { id: parseInt(projectId, 10) },
+        include: {
+          members: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  user_name: true,
+                  user_email: true
+                }
+              }
+            }
+          }
+        }
+      });
+  
+      const ProjectMembers = projectWithMembers?.members.map(member => ({
+        userId: member.user.id,
+        userName: member.user.user_name,
+        userEmail: member.user.user_email,
+        role: member.role
+      }));
+    //   console.log("ProjectMembers ",ProjectMembers);
+      res.status(200).json({ProjectMembers});
+    } catch (error) {
+        console.log("Error fetching project members : ", error);
+        res.status(500).json({ error: 'Cannot get members of a project'});
+    }
+};
+
+export const getPhaseList = async (req: Request, res: Response) => {
+    try {
+        const phaseList = await prisma.phase.findMany();
+        console.log(phaseList);
+        res.status(200).json({phaseList});
+    } catch (error) {
+        console.log("Error fetching phase list : ", error);
+        res.status(500).json({ error: 'Cannot get phases of a project'});
+    }
+};
+
+export const getAllTasks = async (req: CustomProjectRequest, res: Response) => {
+    try {
+        const projectId = req.query.projectId;
+        // Ensure projectId is provided and is valid number
+        if (!projectId || isNaN(Number(projectId))) {
+            return res.status(400).json({ error: 'Invalid projectId ' });
+        }
+        const tasks = await prisma.phase.findMany({
+            include: {
+                tasks: {
+                  where: {
+                    project_id: parseInt(projectId, 10)
+                  },
+                  include: {
+                    members: {  //TaskMembers
+                      include: {
+                        user: {
+                          select: {
+                            id: true,
+                            user_name: true,
+                            user_email: true
+                          }
+                        }
+                      }
+                    },
+                    items: true //TaskItems
+                  }
+                }
+              }
+        });
+        console.log(tasks);
+        res.status(200).json({tasks});
+    } catch (error) {
+        console.log("Error fetching allTasks : ", error);
+        res.status(500).json({ error: 'Cannot get tasks of a project'});
+    }
+}
+
+// interface CustomTaskRequest {
+//     query : any;
+// }
+
+// export const getTaskMembers = async (req: CustomTaskRequest, res: Response) => {
+//     try{
+
+//     }catch(err){
+//         console.log("Error fetching getTaskMembers : ", err);
+//         res.status(500).json({ error: 'Cannot get tasks of a project'});
+//     }
+// }
+
+
+export const createTask = async ( req: CustomProjectRequest, res: Response) => {
+    try{
+        const {projectId, phaseId} = req.query;
+        // Ensure projectId is provided and is valid number
+        if (!projectId || isNaN(Number(projectId)) || !phaseId || isNaN(Number(phaseId))) {
+            return res.status(400).json({ error: 'Invalid projectId or phaseId' });
+        }
+        // parseInt(projectId, 10)
+        const { task_title, task_description} = req.body;
+        const newTask = await prisma.task.create({
+            data: {
+                task_title, 
+                task_description,
+                priority: 'LOW',
+                project_id: parseInt(projectId, 10),
+                phase_id: parseInt(phaseId, 10),
+                task_deadline_date: new Date(),
+                task_completed_date: new Date(),
+            }
+        });
+        res.status(201).json({newTask});
+    }catch(err) {
+        console.log("Error in Create task : ", err);
+        res.status(500).json({error: "Error in creating a task "});
     }
 }

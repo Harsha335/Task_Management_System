@@ -8,7 +8,7 @@ import ReactTable from '../../ui_components/ReactTable';
 import { toZonedTime, format as formatZoned } from 'date-fns-tz';
 import UserAvathar from '../../ui_components/UserAvathar.js';
 
-const Project = () => {
+const Projects = () => {
   const [projectsData, setProjectsData] = useState([]);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -80,4 +80,4 @@ const Project = () => {
   )
 }
 
-export default Project;
+export default Projects;

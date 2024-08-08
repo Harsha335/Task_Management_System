@@ -4,7 +4,8 @@ import Login from "./components/Login";
 import { ProtectedRoute } from "./auth/ProtectedRoute";
 import Dashboard from "./components/Dashboard";
 import PageNotFound from "./components/PageNotFound";
-import Project from "./components/Projects";
+import Projects from "./components/Projects";
+import Project from "./components/Project";
 
 function App() {
   return (
@@ -13,7 +14,8 @@ function App() {
         <Route path="/login" element={<Login/>}/>
         <Route element={<ProtectedRoute/>}>
           <Route path="/" element={<Dashboard/>}/>
-          <Route path="/projects" element={<Project/>}/>
+          <Route path="/projects" element={<Projects/>}/>
+          <Route path="/project/:projectId" element={<Project/>}/>
         </Route>
         <Route path="*" element={<PageNotFound/>}/>
       </Routes>
