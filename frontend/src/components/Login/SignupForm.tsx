@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../api_calls/api_instance';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const SignupForm : React.FC = () => {
 
@@ -24,6 +25,7 @@ const SignupForm : React.FC = () => {
     useEffect(() => {
         if(userForm.userPassword !== userForm.userConfirmPassword){
             setError('Password Does not match!!');
+            // toast.error('Password Does not match!!');
         }else{
             setError('');
         }
@@ -50,6 +52,7 @@ const SignupForm : React.FC = () => {
         event.preventDefault();
         if(!validateDetails({userName: userForm.userName, userEmail: userForm.userEmail, password: userForm.userPassword,confirmPassword : userForm.userConfirmPassword})){
             setError('All values required !!');
+            toast.info('All values required !!');
             return;
         }
         try{
@@ -61,6 +64,7 @@ const SignupForm : React.FC = () => {
             const body : bodyType = { user_name : userForm.userName, user_email : userForm.userEmail, user_password : userForm.userPassword }
             const response = await axiosInstance.post('/api/signup', body);
             console.log("signup response: ",response);
+            toast.success('Created user successfully !!');
             navigate('/login');
         }catch(err : unknown){
             if (axios.isAxiosError(err)) {
@@ -71,6 +75,7 @@ const SignupForm : React.FC = () => {
                 // Handle other types of errors (non-Axios errors)
                 console.log("Error at signup handleSubmit: ", err);
             }
+            toast.error("Error while creating a user ")
         }
     }
 

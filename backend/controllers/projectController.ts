@@ -156,15 +156,7 @@ export const declineInvitation = (req: Request, res: Response) => {
 export const getProjectsByUserId = async (req: CustomRequest, res: Response) => {
     try{
         const user_id : number = req.user ? req.user.id : 0;
-        // const projectIds = await prisma.projectMember.findMany({
-        //     where: {
-        //         user_id
-        //     },
-        //     select: {
-        //         project_id: true
-        //     }
-        // }); 
-        const projectDetails = await prisma.project.findMany({
+        const projects = await prisma.project.findMany({
             where: {
                 members: {
                   some: {   // Ensure at least one related ProjectMember matches the condition
@@ -183,9 +175,23 @@ export const getProjectsByUserId = async (req: CustomRequest, res: Response) => 
                   }
                 }
               },
-            }
-          });          
-        console.log(projectDetails);
+              tasks: true
+            },
+          });     
+          // Calculate project status for each project
+          const projectDetails = projects.map(project => {
+            // Count the number of tasks in phase_id = 5
+            const completedTasksCount = project.tasks.filter(task => task.phase_id === 5).length;
+            // Total number of tasks
+            const totalTasksCount = project.tasks.length;
+            // Calculate project status
+            const projectStatus = totalTasksCount === 0 ? 0 : (completedTasksCount / totalTasksCount) * 100;
+
+            return {
+                ...project,
+                projectStatus: projectStatus.toFixed(2) // Converts to percentage
+            };
+        });     
         res.status(200).json({projectDetails});
     }catch(err){
         console.log("Error at getProjectsByUserId : ", err);
@@ -315,7 +321,6 @@ export const createTask = async ( req: CustomProjectRequest, res: Response) => {
                 project_id: parseInt(projectId, 10),
                 phase_id: parseInt(phaseId, 10),
                 task_deadline_date: new Date(),
-                task_completed_date: new Date(),
             }
         });
         res.status(201).json({newTask});
@@ -349,7 +354,7 @@ export const joinTask = async (req : CustomTaskRequest, res: Response) => {
       return res.status(409).json({ error: "User is already a member of this task." });
     }
     
-    const newTaskMember = await prisma.taskMember.create({
+    await prisma.taskMember.create({
       data: {
         user_id,
         task_id: parseInt(taskId, 10)

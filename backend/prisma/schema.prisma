@@ -33,9 +33,8 @@ model Project {
   id              Int             @id @default(autoincrement())
   project_title   String
   project_description String
-  is_completed          Boolean         @default(false)
   project_deadline_date DateTime?
-  project_completed_date DateTime?
+  project_updated_date DateTime @default(now()) @updatedAt // This will automatically update whenever the record is updated
 
   members         ProjectMember[]
   tasks           Task[]
@@ -65,7 +64,7 @@ model Task {
   task_title      String
   task_description String
   task_deadline_date DateTime
-  task_completed_date DateTime @updatedAt // This will automatically update whenever the record is updated
+  task_updated_date DateTime @default(now()) @updatedAt // This will automatically update whenever the record is updated
   priority        Priority
   phase_id        Int
   project_id      Int

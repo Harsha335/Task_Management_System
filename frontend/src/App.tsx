@@ -6,6 +6,7 @@ import PageNotFound from "./components/PageNotFound";
 import Projects from "./components/Projects";
 import Project from "./components/Project";
 
+
 function App() {
   return (
     <Router>

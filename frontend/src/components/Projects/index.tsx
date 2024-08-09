@@ -7,6 +7,7 @@ import CreateProjectPopup from './CreateProjectPopup';
 import ReactTable from '../../ui_components/ReactTable';
 import { toZonedTime, format as formatZoned } from 'date-fns-tz';
 import UserAvathar from '../../ui_components/UserAvathar.js';
+import { ToastContainer } from 'react-toastify';
 
 const Projects = () => {
   const [projectsData, setProjectsData] = useState([]);
@@ -40,8 +41,15 @@ const Projects = () => {
         },
         {
           Header: "Status",
-          accessor: "is_completed",
-          Cell: ({ value }: {value : boolean}) => (value ? 'Completed' : 'Pending')          
+          accessor: "projectStatus",
+          Cell: ({ value }: {value : number}) => (
+            <div className='flex flex-row items-center gap-2 p-1'>
+              {value}% 
+              <div className="w-full bg-secondary rounded-full h-2.5">
+                  <div className={`bg-indigo-600 h-2.5 rounded-full`} style={{width: `${value}%`}}></div>
+              </div>
+            </div>
+          )       
         },
       ]
     }
@@ -68,6 +76,7 @@ const Projects = () => {
   return (
     <div className='flex flex-row w-full'>
       <Navbar/>
+      <ToastContainer />
       <div className='w-full p-2 relative'>
           <span className='text-3xl font-bold'>Projects</span>
           <div className='w-full flex justify-center items-center p-4'>

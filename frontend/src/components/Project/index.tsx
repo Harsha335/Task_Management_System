@@ -3,6 +3,7 @@ import ProjectBoard from './DragAndDrop/ProjectBoard';
 import { useEffect, useState } from 'react';
 import axiosTokenInstance from '../../api_calls/api_token_instance';
 import UserAvathar from '../../ui_components/UserAvathar.js';
+import { ToastContainer } from 'react-toastify';
 
 const Project: React.FC = () => {
   const {projectId} = useParams();
@@ -60,7 +61,7 @@ enum Priority {
   phase_id: number;
   project_id: number;
   task_deadline_date: Date;
-  task_completed_date: Date;
+  task_updated_date: Date;
   
   members: TaskMember[];
   items: TaskItem[];
@@ -102,6 +103,10 @@ enum Priority {
   },[searchTerm]);
 
   useEffect(() => {
+    setSearchedAllPhaseTask(allPhaseTask);
+  },[allPhaseTask]);
+
+  useEffect(() => {
     const getProjectMembers = async () => {
       try{
         const response = await axiosTokenInstance.get(`/api/project/projectMembers?projectId=${projectId}`);
@@ -125,7 +130,6 @@ enum Priority {
         const response = await axiosTokenInstance.get(`/api/project/allTasks?projectId=${projectId}`);
         console.log(response.data.tasks);
         setAllPhaseTask(response.data.tasks);
-        setSearchedAllPhaseTask(response.data.tasks);
       }catch(err){
         console.log("Error at getAllTasks: ", err);
       }
@@ -136,14 +140,13 @@ enum Priority {
   },[]);
   return (
     <div className="flex flex-col h-screen">
-      <div className='bg-primary-light p-2 flex flex-row justify-between'>
+      <ToastContainer />
+      <div className='bg-primary-light p-2 flex flex-row justify-between px-5'>
         <input type="text" placeholder='Search Tasks.. ' className='p-2 border-2 border-slate-200 rounded-lg w-72' value={searchTerm} onChange={handleSearchChange} />
         <div className='flex flex-row gap-5 items-center'>
           {/* TODO : Filter by priority */}
-          <span>Filter</span>
+          {/* <span>Filter</span> */}
           <UserAvathar maxUsersCount={5} users={projectMembers.map((member: any) => ({'name': member.userName, 'email':member.userEmail}))}/>
-            {/* TODO : Mark as project completed (THINK ONCE ABOUT REMOVE project -> is_completed and autoUpdate - completedDate)*/}
-            <button>Mark as Complete</button>
         </div>
       </div>
         <div>

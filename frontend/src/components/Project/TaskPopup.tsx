@@ -7,6 +7,7 @@ import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import axiosTokenInstance from '../../api_calls/api_token_instance';
+import { toast } from 'react-toastify';
 
 type User = {
     id: number;
@@ -42,7 +43,7 @@ type User = {
     phase_id: number;
     project_id: number;
     task_deadline_date: Date;
-    task_completed_date: Date;
+    task_updated_date: Date;
     
     members: TaskMember[];
     items: TaskItem[];
@@ -106,8 +107,10 @@ const TaskPopup : React.FC<PropsType> = ({projectId, phaseId, handleTaskPopup, t
         e.preventDefault();
         try{
             await axiosTokenInstance.post(`/api/project/update/task?taskId=${task.id}`, {priority: taskData.priority,task_deadline_date: taskData.task_deadline_date, items: taskData.items});
+            toast.success('Updated task successfully !!');
         }catch(err){
             console.log("Error at handle create new task : ",err);
+            toast.error('Error while Updating task !!');
         }
         handleClose();
     }
@@ -160,7 +163,7 @@ const TaskPopup : React.FC<PropsType> = ({projectId, phaseId, handleTaskPopup, t
                                 {/* <progress className='w-full text-primary-light' value={taskData.items.reduce((sum, item) => sum + (item.is_completed ? 1 : 0), 0)/taskData.items.length} max="1"></progress> */}
                                 {taskData.items.length > 0 && 
                                     <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
-                                    <div className={`bg-blue-600 h-2.5 rounded-full`} style={{width: `${((taskData.items.reduce((sum, item) => sum + (item.is_completed ? 1 : 0), 0)/taskData.items.length)*100)}%`}}></div>
+                                        <div className={`bg-blue-600 h-2.5 rounded-full`} style={{width: `${((taskData.items.reduce((sum, item) => sum + (item.is_completed ? 1 : 0), 0)/taskData.items.length)*100)}%`}}></div>
                                     </div>
                                 }
                                 {

@@ -2,6 +2,7 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../api_calls/api_instance';
+import { toast } from 'react-toastify';
 
 const SigninForm : React.FC = () => {
     const [userName, setUserName] = useState<string>('');
@@ -27,10 +28,12 @@ const SigninForm : React.FC = () => {
         event.preventDefault();
         if(!validateDetails({userName: userName, password: userPassword})){
             setError('All values required !!');
+            toast.info('All values required !!');
             return;
         }
         try{
             const response = await axiosInstance.post('/api/signin', {user_email : userName, user_password: userPassword});
+            toast.success('Loged in successfully !!');
             console.log("signin response: ",response);
             const token: string = response.data.token;
             sessionStorage.setItem('authToken', token);
@@ -44,6 +47,7 @@ const SigninForm : React.FC = () => {
                 // Handle other types of errors (non-Axios errors)
                 console.log("Error at signin handleSubmit: ", err);
             }
+            toast.error("Error while login..")
         }
     }
 

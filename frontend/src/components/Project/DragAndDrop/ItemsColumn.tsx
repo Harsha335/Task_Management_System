@@ -37,7 +37,7 @@ enum Priority {
   phase_id: number;
   project_id: number;
   task_deadline_date: Date;
-  task_completed_date: Date;
+  task_updated_date: Date;
   
   members: TaskMember[];
   items: TaskItem[];

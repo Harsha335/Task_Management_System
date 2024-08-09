@@ -3,6 +3,7 @@ import ClearIcon from '@mui/icons-material/Clear';
 import DescriptionIcon from '@mui/icons-material/Description';
 
 import axiosTokenInstance from '../../api_calls/api_token_instance';
+import { toast, ToastContainer } from 'react-toastify';
 
 type PropsType = {
     projectId: number;
@@ -34,13 +35,16 @@ const CreateTaskPopup : React.FC<PropsType> = ({projectId, phaseId, handleCreate
         try{
             // console.log(taskData)
             await axiosTokenInstance.post(`/api/project/create/task?projectId=${projectId}&phaseId=${phaseId}`, taskData);
+            toast.success('Task created successfully!!');
         }catch(err){
             console.log("Error at handle create new task : ",err);
+            toast.error('Error while creating a task ')
         }
         handleClose();
     }
     return (
         <div className='bg-[rgba(0,0,0,0.7)] absolute top-0 left-0 w-full h-full flex items-center justify-center '>
+            <ToastContainer/>
             <div className='w-96 bg-white p-5 rounded-lg relative'>
                 <button className='rounded-full absolute top-3 right-3' onClick={() => handleClose()}><ClearIcon/></button>
                 <form className="flex flex-col justify-between gap-12">

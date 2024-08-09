@@ -3,6 +3,9 @@ import loginImg from "../../assets/images/sign_in.png"
 import SigninForm from "./SigninForm";
 import SignupForm from './SignupForm';
 
+import { ToastContainer} from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 const Login : React.FC = () => {
     const [isSigninForm, setIsSigninForm] =  useState<boolean>(true);
     const handleFormPageChange = (e : React.MouseEvent<HTMLButtonElement, MouseEvent>, isSigninForm: boolean) => {
@@ -11,6 +14,7 @@ const Login : React.FC = () => {
     }
     return (
         <div className="flex w-full h-[100vh]">
+        <ToastContainer />
         <div className="hidden flex-1  min-h-full lg:flex lg:align-center lg:justify-center">
             <img src={loginImg} alt='Login image' className='w-[75%] object-contain'/>
         </div>

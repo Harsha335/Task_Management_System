@@ -3,52 +3,8 @@ import { DragDropContext, DropResult } from "react-beautiful-dnd";
 import ItemsColumn from "./ItemsColumn";
 import StrictModeDroppable from "./Dragable";
 import axiosTokenInstance from "../../../api_calls/api_token_instance";
+import { toast } from "react-toastify";
 
-// interface ITodoItem {
-//   id: number;
-//   task_title: string;
-// }
-// interface ColumnItem {
-//     id: number;
-//     phase_title: string;
-//     tasks: ITodoItem[];
-// }
-
-// const initialTodoItems = [
-//     {
-//       id: 1,
-//       task_title: "Go for a walk",
-//     },
-//     {
-//       id: 2,
-//       task_title: "Take a nap",
-//     },
-//     {
-//       id: 3,
-//       task_title: "Read a book",
-//     },
-//     {
-//       id: 4,
-//       task_title: "Work out",
-//     },
-//     {
-//       id: 5,
-//       task_title: "Learn something new",
-//     },
-// ];
-  
-// const initialAllTasks = {
-//     todoColumn: {
-//       id: 1,
-//       phase_title: "To do",
-//       tasks: [...initialTodoItems],
-//     },
-//     doneColumn: {
-//       id: 2,
-//       phase_title: "Done",
-//       tasks: [],
-//     },
-// };
 
 type User = {
   id: number;
@@ -84,7 +40,7 @@ enum Priority {
   phase_id: number;
   project_id: number;
   task_deadline_date: Date;
-  task_completed_date: Date;
+  task_updated_date: Date;
   
   members: TaskMember[];
   items: TaskItem[];
@@ -173,7 +129,8 @@ const ProjectBoard  = ({allPhaseTask, setAllPhaseTask, projectId} : {allPhaseTas
           await axiosTokenInstance.post('/api/project/swap/task', {
             task_id : parseInt(result.draggableId, 10),
             phase_id: parseInt(destSectionId, 10)+1 // take real phase_id
-          })
+          });
+          toast.info('Task updated successfully !!');
         }
         swapTasks();
       }

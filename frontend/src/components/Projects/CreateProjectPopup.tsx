@@ -5,6 +5,7 @@ import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import axiosTokenInstance from '../../api_calls/api_token_instance';
+import { toast, ToastContainer } from 'react-toastify';
 
 type PropsType = {
     handleCreateProject: () => void;
@@ -58,13 +59,16 @@ const CreateProjectPopup : React.FC<PropsType> = ({handleCreateProject}) => {
         e.preventDefault();
         try{
             await axiosTokenInstance.post('/api/project/create', projectData);
+            toast.success('Created Project successfully !!');
         }catch(err){
             console.log("Error at handle create project submit : ",err);
+            toast.error('Error while creating project !!');
         }
         handleClose();
     }
     return (
         <div className='bg-slate-200 bg-transparent absolute top-0 left-0 w-full h-full flex items-center justify-center '>
+            <ToastContainer/>
             <div className='w-96 bg-white p-5 rounded-lg relative'>
                 <button className='rounded-full absolute top-3 right-3' onClick={() => handleClose()}><ClearIcon/></button>
                 <form className="flex flex-col justify-between gap-12">
